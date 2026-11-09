@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 public class Enemy : MonoBehaviour
 {
@@ -8,12 +9,14 @@ public class Enemy : MonoBehaviour
     public int nextMove;
     Animator animator;
     SpriteRenderer spriteRenderer;
+    CapsuleCollider2D capsulecollider;
 
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        capsulecollider =  GetComponent<CapsuleCollider2D>();
         Invoke("Think", 5);
     }
 
@@ -56,5 +59,24 @@ public class Enemy : MonoBehaviour
         spriteRenderer.flipX = nextMove == 1;
         CancelInvoke();
         Invoke("Think", 5);
+    }
+
+    public void OnDamaged()
+    {
+        // Sprite Alpha
+        spriteRenderer.color = new Color(1, 1, 1, 0.4f);
+        // Sprite Flip Y
+        spriteRenderer.flipY = true;
+        // Collider disable
+        capsulecollider.enabled = false;
+        // Die Effect Jump
+        rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+        // Destroy
+        Invoke("DeActive", 5);
+    }
+
+    void DeActive()
+    {
+        gameObject.SetActive(false);
     }
 }
