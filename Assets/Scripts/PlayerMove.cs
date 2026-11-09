@@ -4,6 +4,7 @@ public class PlayerMove : MonoBehaviour
 {
     Rigidbody2D rigid;
     public float maxSpeed;
+    public float jumpPower;
     SpriteRenderer spriteRenderer;
     Animator animator;
     private void Awake()
@@ -15,8 +16,16 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
-        // Stop Speed
-        if (Input.GetButtonUp("Horizontal"))
+        // Jump
+        if (Input.GetButtonDown("Jump") && !animator.GetBool("isJumping"))
+        {
+            rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            animator.SetBool("isJumping", true);
+        }
+
+
+            // Stop Speed
+            if (Input.GetButtonUp("Horizontal"))
         {
 
             rigid.linearVelocity = new Vector2(rigid.linearVelocity.normalized.x * 0.8f, rigid.linearVelocity.y);
@@ -51,6 +60,18 @@ public class PlayerMove : MonoBehaviour
         else if (rigid.linearVelocity.x < maxSpeed * (-1))
         {
             rigid.linearVelocity = new Vector2(maxSpeed * (-1), rigid.linearVelocity.y);
+        }
+
+        // Landing Platform
+        if(rigid.linearVelocity.y < 0)
+        {
+            Debug.DrawRay(rigid.position, Vector3.down, new Color(0, 1, 0));
+            RaycastHit2D rayHit = Physics2D.Raycast(rigid.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
+            if (rayHit.collider != null)
+            {
+                if (rayHit.distance < 0.5f)
+                    animator.SetBool("isJumping", false);
+            }
         }
     }
 }
